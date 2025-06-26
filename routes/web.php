@@ -24,9 +24,11 @@ Route::get('/chart', [ChartController::class, 'index'])->name('chart.index');
 Route::post('/chart/render', [ChartController::class, 'render'])->name('chart.render');
 
 
-Route::get('/open-csv', [SpreadsheetController::class, 'openSpreadsheet'])->name('csv.open');
-
-
-Route::get('/spreadsheet', [SpreadsheetController::class, 'spreadsheetEditor'])->name('csv.editor');
-Route::get('/sheet', [SheetController::class, 'viewSheet'])->name('csv.editor');
+Route::get('/spreadsheet', [SpreadsheetController::class, 'fetchFromGoogleSheet'])->name('csv.editor');
 Route::post('/spreadsheet/save', [SpreadsheetController::class, 'saveSpreadsheet'])->name('csv.save');
+Route::get('/sheet', [SheetController::class, 'spreadsheet'])->name('spreadsheet');
+
+Route::post('/save-csv-data', function (Illuminate\Http\Request $request) {
+    session(['csv_data' => $request->input('data')]);
+    return response()->json(['status' => 'ok']);
+});

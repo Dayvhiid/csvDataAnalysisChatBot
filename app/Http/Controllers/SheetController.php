@@ -7,9 +7,11 @@ use Illuminate\Http\Request;
 class SheetController extends Controller
 {
     //
-    public function viewSheet()
-    {
-        $csvData = session('csv_data');
-        return view('sheet', ['csvData' => $csvData]);
-    }
+  public function spreadsheet()
+{
+    $data = session('csv_data') ?? [];
+
+    return view('sheet', compact('data'));
+}
+
 }

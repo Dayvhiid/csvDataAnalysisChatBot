@@ -4,11 +4,21 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use App\Services\GoogleSheetService;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Illuminate\Support\Facades\Storage;
 
 class SpreadsheetController extends Controller
 {
+
+
+    
+
+public function fetchFromGoogleSheet(GoogleSheetService $sheets)
+{
+    $data = $sheets->readSheet(); // Default: Sheet1!A1:D10
+    return view('your-view', compact('data'));
+}
 
 public function openSpreadsheet()
 {
@@ -52,30 +62,6 @@ public function spreadsheetEditor()
     return view('csv.editor', compact('rows'));
 }
 
-
-// public function saveSpreadsheet(Request $request)
-// {
-//     $data = json_decode($request->input('data'), true);
-//     $filename = session('csv_filename');
-
-//     if (!$filename || !$data) {
-//         return back()->with('error', 'Missing file or data.');
-//     }
-
-//     $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-//     $sheet = $spreadsheet->getActiveSheet();
-
-//     foreach ($data as $rowIndex => $row) {
-//         foreach ($row as $colIndex => $cellValue) {
-//             $sheet->setCellValueByColumnAndRow($colIndex + 1, $rowIndex + 1, $cellValue);
-//         }
-//     }
-
-//     $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Csv');
-//     $writer->save(storage_path('app/csv/' . $filename));
-
-//     return back()->with('success', 'Spreadsheet saved successfully!');
-// }
 
 
 public function saveSpreadsheet(Request $request)
