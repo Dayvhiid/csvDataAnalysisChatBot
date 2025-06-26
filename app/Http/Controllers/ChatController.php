@@ -57,7 +57,8 @@ class ChatController extends Controller
             }
         }
 
-        session(['csv_data' => $formatted]);
+        session(['csv_data' => $formatted,
+     'csv_filename' => $filename]);
 
         return redirect()->route('chat.index')->with('success', 'CSV uploaded and parsed successfully!');
     }
@@ -74,8 +75,8 @@ class ChatController extends Controller
         }
 
         // Limit to first 10 rows to keep prompt size small
-        $csvSample = array_slice($csvData, 0, 10);
-        $csvText = "Here is the CSV data:\n";
+        $csvSample = array_slice($csvData, 0, 150);
+        $csvText = "Here is the CSV data: Analyse it like a data analyst woth 30 years of experience\n";
 
         foreach ($csvSample as $row) {
             $csvText .= implode(', ', $row) . "\n";
@@ -89,7 +90,7 @@ class ChatController extends Controller
             'HTTP-Referer' => 'http://localhost:8000', // Must match your domain
             'Content-Type' => 'application/json',
         ])->post('https://openrouter.ai/api/v1/chat/completions', [
-            'model' => 'mistralai/mistral-7b-instruct', // ✅ free model
+            'model' => 'mistralai/mistral-7b-instruct:free',
             'messages' => [
                 ['role' => 'user', 'content' => $finalPrompt],
             ],
@@ -127,7 +128,7 @@ class ChatController extends Controller
         'Authorization' => 'Bearer ' . env('OPENROUTER_API_KEY'),
         'HTTP-Referer' => 'http://localhost:8000', // optional
     ])->post('https://openrouter.ai/api/v1/chat/completions', [
-        'model' => 'mistralai/mistral-7b-instruct', // or any other model you prefer
+        'model' => 'mistralai/mistral-7b-instruct:free',
         'messages' => [
             ['role' => 'user', 'content' => $prompt],
         ],
