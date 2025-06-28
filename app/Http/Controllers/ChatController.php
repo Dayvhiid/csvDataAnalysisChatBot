@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use App\Services\GoogleSheetService;
 
 class ChatController extends Controller
 {
@@ -148,5 +149,23 @@ class ChatController extends Controller
 
     return redirect()->route('chat.index');
 }
+
+
+
+
+
+public function pushToGoogleSheet(GoogleSheetService $googleSheetService)
+{
+    $csvData = session('csv_data');
+
+    if (!$csvData) {
+        return redirect()->back()->with('error', 'No CSV data found in session.');
+    }
+
+    $url = $googleSheetService->createAndFillSheet('Uploaded CSV - ' . now()->format('Ymd_His'), $csvData);
+
+    return redirect($url); // or pass to view
+}
+
 
 }

@@ -32,3 +32,7 @@ Route::post('/save-csv-data', function (Illuminate\Http\Request $request) {
     session(['csv_data' => $request->input('data')]);
     return response()->json(['status' => 'ok']);
 });
+
+
+
+Route::get('/spreadsheet/google', [ChatController::class, 'pushToGoogleSheet'])->name('spreadsheet.google');
