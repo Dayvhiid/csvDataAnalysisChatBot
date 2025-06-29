@@ -58,8 +58,16 @@ class ChatController extends Controller
             }
         }
 
-        session(['csv_data' => $formatted,
-     'csv_filename' => $filename]);
+            session([
+            'csv_headers' => $headers,
+            'csv_data' => $formatted,
+            'csv_filename' => $filename
+        ]);
+
+
+
+      
+
 
         return redirect()->route('chat.index')->with('success', 'CSV uploaded and parsed successfully!');
     }

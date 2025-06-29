@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CsvController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ChartController;
 use App\Http\Controllers\SheetController;
@@ -18,10 +19,16 @@ Route::post('/upload', [ChatController::class, 'upload'])->name('chat.upload');
 Route::post('/ask', [ChatController::class, 'ask'])->name('chat.ask');
 Route::post('/chat/prompt', [ChatController::class, 'prompt'])->name('chat.prompt');
 
-
-
 Route::get('/chart', [ChartController::class, 'index'])->name('chart.index');
 Route::post('/chart/render', [ChartController::class, 'render'])->name('chart.render');
+
+
+Route::get('/csv/edit', [CsvController::class, 'edit'])->name('csv.edit');
+Route::post('/csv/save', [CsvController::class, 'save'])->name('csv.save');
+
+
+
+
 
 
 Route::get('/spreadsheet', [SpreadsheetController::class, 'fetchFromGoogleSheet'])->name('csv.editor');

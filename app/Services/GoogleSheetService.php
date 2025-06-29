@@ -1,44 +1,77 @@
 <?php
+
 namespace App\Services;
 
-use Google_Client;
-use Google_Service_Sheets;
+use Google\Client;
+use Google\Service\Sheets;
+use Google\Service\Drive;
+use Google\Service\Drive\DriveFile;
+use Google\Service\Exception as GoogleServiceException;
 
 class GoogleSheetService
 {
     protected $client;
-    protected $service;
+    protected $sheetService;
+    protected $driveService;
 
     public function __construct()
     {
-        $this->client = new Google_Client();
+        $this->client = new Client();
+        $this->client->setApplicationName('csvDataAnalysisChat-Bot');
+        $this->client->setScopes([
+            Sheets::SPREADSHEETS,
+            Drive::DRIVE
+        ]);
         $this->client->setAuthConfig(storage_path('app/google-sheets.json'));
-        $this->client->addScope(Google_Service_Sheets::SPREADSHEETS);
-        $this->service = new Google_Service_Sheets($this->client);
+        $this->client->setAccessType('offline');
+
+        $this->sheetService = new Sheets($this->client);
+        $this->driveService = new Drive($this->client);
     }
 
-    public function createAndFillSheet($title, array $values)
+    public function createAndFillSheet(string $title, array $data)
     {
-        // Step 1: Create Sheet
-        $spreadsheet = new \Google_Service_Sheets_Spreadsheet([
-            'properties' => ['title' => $title]
-        ]);
+        try {
+            $sharedFolderId = '1tJlja8EuCiUNkf7XlqOg3CX1RH3nHRaC';
 
-        $spreadsheet = $this->service->spreadsheets->create($spreadsheet);
-        $spreadsheetId = $spreadsheet->spreadsheetId;
+            // Check quota before proceeding (simplistic approach)
+            $about = $this->driveService->about->get(['fields' => 'storageQuota']);
+            $quota = $about->getStorageQuota();
+            
+            if ($quota->getUsage() >= $quota->getLimit()) {
+                throw new \Exception('Google Drive storage quota exceeded. Please free up space or use a different account.');
+            }
 
-        // Step 2: Insert Data
-        $body = new \Google_Service_Sheets_ValueRange([
-            'values' => $values
-        ]);
+            $fileMetadata = new DriveFile([
+                'name' => $title,
+                'mimeType' => 'application/vnd.google-apps.spreadsheet',
+                'parents' => [$sharedFolderId],
+            ]);
 
-        $this->service->spreadsheets_values->update(
-            $spreadsheetId,
-            'Sheet1!A1',
-            $body,
-            ['valueInputOption' => 'RAW']
-        );
+            $file = $this->driveService->files->create($fileMetadata, [
+                'fields' => 'id'
+            ]);
 
-        return $spreadsheet->spreadsheetUrl;
+            $spreadsheetId = $file->id;
+
+            $body = new Sheets\ValueRange(['values' => $data]);
+            $params = ['valueInputOption' => 'RAW'];
+
+            $this->sheetService->spreadsheets_values->update(
+                $spreadsheetId,
+                'Sheet1!A1',
+                $body,
+                $params
+            );
+
+            return $spreadsheetId;
+
+        } catch (GoogleServiceException $e) {
+            // Handle specific Google API errors
+            throw new \Exception('Google API Error: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            // Handle other errors
+            throw $e;
+        }
     }
 }
